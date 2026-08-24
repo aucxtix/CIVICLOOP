@@ -72,6 +72,44 @@ async function main() {
     },
   });
 
+  // Vehicles
+  await prisma.vehicle.upsert({
+    where: { vehicleId: 'V-001' },
+    update: {},
+    create: {
+      vehicleId: 'V-001',
+      modelAndPlate: 'Volvo FL Electric (MH 01 EA 1234)',
+      status: 'Active',
+      capacity: '80% Full',
+      location: 'Zone 4A',
+      driverId: worker.id
+    }
+  });
+
+  await prisma.vehicle.upsert({
+    where: { vehicleId: 'V-002' },
+    update: {},
+    create: {
+      vehicleId: 'V-002',
+      modelAndPlate: 'Tata Ultra E.9 (MH 02 EB 5678)',
+      status: 'Idle',
+      capacity: '0% Full',
+      location: 'Depot'
+    }
+  });
+
+  await prisma.vehicle.upsert({
+    where: { vehicleId: 'V-003' },
+    update: {},
+    create: {
+      vehicleId: 'V-003',
+      modelAndPlate: 'Ashok Leyland Boss (MH 03 EC 9012)',
+      status: 'Maintenance',
+      capacity: '- Full',
+      location: 'Garage'
+    }
+  });
+
   console.log('Seeding completed.');
 }
 

@@ -1,22 +1,83 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Users, Activity, Navigation, Settings } from 'lucide-react';
+import { Truck, Users, Activity, Navigation, Settings, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
+import api from '@/lib/api';
+
+interface Vehicle {
+  id: string;
+  vehicleId: string;
+  modelAndPlate: string;
+  status: string;
+  driver?: { name: string };
+  capacity: string;
+  location: string;
+}
 
 const AdminVehicleRegistryPage = () => {
-  const [vehicles, setVehicles] = useState([
-    { id: 'V-001', model: 'Volvo FL Electric', plate: 'MH 01 EA 1234', status: 'Active', assignedTo: 'Michael Scott', capacity: '80%', location: 'Zone 4A' },
-    { id: 'V-002', model: 'Tata Ultra E.9', plate: 'MH 02 EB 5678', status: 'Idle', assignedTo: 'Unassigned', capacity: '0%', location: 'Depot' },
-    { id: 'V-003', model: 'Ashok Leyland Boss', plate: 'MH 03 EC 9012', status: 'Maintenance', assignedTo: 'Unassigned', capacity: '-', location: 'Garage' },
-    { id: 'V-004', model: 'Volvo FL Electric', plate: 'MH 01 EA 3456', status: 'Active', assignedTo: 'Dwight Schrute', capacity: '45%', location: 'Zone 2B' },
-  ]);
+  const [vehicles, setVehicles] = useState<Vehicle[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleAssign = (id: string) => {
-    toast.success(`Assigned worker to vehicle ${id} successfully!`);
-    setVehicles(vehicles.map(v => v.id === id ? { ...v, status: 'Active', assignedTo: 'New Worker', location: 'Dispatch' } : v));
+  useEffect(() => {
+    fetchVehicles();
+  }, []);
+
+  const fetchVehicles = async () => {
+    try {
+      const response = await api.get('/vehicles');
+      setVehicles(response.data);
+    } catch (error) {
+      toast.error('Failed to load vehicles');
+    } finally {
+      setIsLoading(false);
+    }
   };
+
+  const handleAddVehicle = async () => {
+    const id = prompt('Enter Vehicle ID (e.g., V-005):');
+    if (!id) return;
+    const model = prompt('Enter Model & Plate:');
+    if (!model) return;
+
+    try {
+      await api.post('/vehicles', {
+        vehicleId: id,
+        modelAndPlate: model
+      });
+      toast.success('Vehicle added successfully!');
+      fetchVehicles();
+    } catch (error) {
+      toast.error('Failed to add vehicle');
+    }
+  };
+
+  const handleAssign = async (id: string) => {
+    try {
+      await api.put(`/vehicles/${id}`, {
+        status: 'Active',
+        location: 'Dispatch'
+      });
+      toast.success(`Vehicle assigned successfully!`);
+      fetchVehicles();
+    } catch (error) {
+      toast.error('Failed to assign vehicle');
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex h-[50vh] items-center justify-center">
+        <Loader2 className="w-8 h-8 animate-spin text-primary" />
+      </div>
+    );
+  }
+
+  const total = vehicles.length;
+  const active = vehicles.filter(v => v.status === 'Active').length;
+  const idle = vehicles.filter(v => v.status === 'Idle').length;
+  const maintenance = vehicles.filter(v => v.status === 'Maintenance').length;
 
   return (
     <div className="w-full space-y-6 animate-in slide-in-from-bottom-4 duration-500">
@@ -25,7 +86,7 @@ const AdminVehicleRegistryPage = () => {
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Vehicle Registry</h1>
           <p className="text-muted-foreground mt-1">Manage fleet, assign vehicles to workers, and track status.</p>
         </div>
-        <Button className="font-bold shadow-sm">
+        <Button className="font-bold shadow-sm" onClick={handleAddVehicle}>
           <Truck className="mr-2 h-4 w-4" /> Add New Vehicle
         </Button>
       </div>
@@ -34,28 +95,28 @@ const AdminVehicleRegistryPage = () => {
         <Card className="border-none shadow-sm bg-card hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <Truck className="w-8 h-8 text-primary mb-4 opacity-80" />
-            <h3 className="text-2xl font-black text-foreground">42</h3>
+            <h3 className="text-2xl font-black text-foreground">{total}</h3>
             <p className="text-sm font-medium text-muted-foreground mt-1">Total Vehicles</p>
           </CardContent>
         </Card>
         <Card className="border-none shadow-sm bg-card hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <Activity className="w-8 h-8 text-blue-500 mb-4 opacity-80" />
-            <h3 className="text-2xl font-black text-foreground">28</h3>
+            <h3 className="text-2xl font-black text-foreground">{active}</h3>
             <p className="text-sm font-medium text-muted-foreground mt-1">Active on Route</p>
           </CardContent>
         </Card>
         <Card className="border-none shadow-sm bg-card hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <Users className="w-8 h-8 text-amber-500 mb-4 opacity-80" />
-            <h3 className="text-2xl font-black text-foreground">5</h3>
+            <h3 className="text-2xl font-black text-foreground">{idle}</h3>
             <p className="text-sm font-medium text-muted-foreground mt-1">Unassigned</p>
           </CardContent>
         </Card>
         <Card className="border-none shadow-sm bg-card hover:shadow-md transition-shadow">
           <CardContent className="p-6">
             <Settings className="w-8 h-8 text-red-500 mb-4 opacity-80" />
-            <h3 className="text-2xl font-black text-foreground">3</h3>
+            <h3 className="text-2xl font-black text-foreground">{maintenance}</h3>
             <p className="text-sm font-medium text-muted-foreground mt-1">In Maintenance</p>
           </CardContent>
         </Card>
@@ -80,12 +141,15 @@ const AdminVehicleRegistryPage = () => {
                 </tr>
               </thead>
               <tbody>
-                {vehicles.map((v) => (
-                  <tr key={v.id} className="bg-card border-b border-slate-50 hover:bg-background">
-                    <td className="px-6 py-4 font-bold text-foreground">{v.id}</td>
+                {vehicles.map((v) => {
+                  const [modelName, plateNum] = v.modelAndPlate.split('(');
+                  
+                  return (
+                  <tr key={v.id} className="bg-card border-b border-border hover:bg-background">
+                    <td className="px-6 py-4 font-bold text-foreground">{v.vehicleId}</td>
                     <td className="px-6 py-4">
-                      <div className="font-semibold text-foreground">{v.model}</div>
-                      <div className="text-xs text-slate-400 font-mono">{v.plate}</div>
+                      <div className="font-semibold text-foreground">{modelName?.trim()}</div>
+                      <div className="text-xs text-muted-foreground font-mono">{plateNum ? `(${plateNum}` : ''}</div>
                     </td>
                     <td className="px-6 py-4">
                       <Badge className={
@@ -96,20 +160,20 @@ const AdminVehicleRegistryPage = () => {
                         {v.status}
                       </Badge>
                     </td>
-                    <td className="px-6 py-4 font-medium">{v.assignedTo}</td>
+                    <td className="px-6 py-4 font-medium">{v.driver?.name || 'Unassigned'}</td>
                     <td className="px-6 py-4">
-                      <div className="font-semibold text-foreground">{v.capacity} Full</div>
+                      <div className="font-semibold text-foreground">{v.capacity}</div>
                       <div className="text-xs flex items-center gap-1 mt-0.5 text-muted-foreground"><Navigation className="w-3 h-3" /> {v.location}</div>
                     </td>
                     <td className="px-6 py-4 text-right">
                       {v.status === 'Idle' ? (
                         <Button size="sm" onClick={() => handleAssign(v.id)} className="font-semibold">Assign</Button>
                       ) : (
-                        <Button variant="ghost" size="sm" className="font-semibold text-slate-400" disabled>Assigned</Button>
+                        <Button variant="ghost" size="sm" className="font-semibold text-muted-foreground" disabled>Assigned</Button>
                       )}
                     </td>
                   </tr>
-                ))}
+                )})}
               </tbody>
             </table>
           </div>

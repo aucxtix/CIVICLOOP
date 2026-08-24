@@ -45,6 +45,30 @@ const AdminRewardsPage = () => {
     }
   };
 
+  const handleAddReward = async () => {
+    const name = prompt('Enter Reward Name:');
+    if (!name) return;
+    const credits = prompt('Enter Credits Required (e.g., 500):');
+    if (!credits) return;
+    const stock = prompt('Enter Stock Quantity:');
+    if (!stock) return;
+    const partner = prompt('Enter Partner Name:');
+    
+    try {
+      await api.post('/rewards', {
+        name,
+        description: `Get ${name} from ${partner || 'our partners'}.`,
+        creditsRequired: credits,
+        stock: stock,
+        partner: partner || 'Internal'
+      });
+      toast.success('Reward added successfully');
+      fetchRewards();
+    } catch (error) {
+      toast.error('Failed to add reward');
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-[50vh] items-center justify-center">
@@ -60,7 +84,7 @@ const AdminRewardsPage = () => {
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Rewards Catalog</h1>
           <p className="text-muted-foreground mt-1">Manage green point redemption items and partners.</p>
         </div>
-        <Button className="bg-primary text-primary-foreground hover:bg-primary/90">
+        <Button onClick={handleAddReward} className="bg-primary text-primary-foreground hover:bg-primary/90">
           <Plus className="w-4 h-4 mr-2" /> Add Reward
         </Button>
       </div>

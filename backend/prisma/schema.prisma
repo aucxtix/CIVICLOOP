@@ -31,6 +31,7 @@ model User {
   reportsAsCitizen Report[] @relation("CitizenReports")
   tasksAsWorker    Report[] @relation("WorkerTasks")
   transactions     Transaction[]
+  drivenVehicles   Vehicle[] @relation("DriverVehicle")
 }
 
 model Report {
@@ -103,4 +104,17 @@ model AuditLog {
   targetId  String?
   metadata  String?  // JSON string
   timestamp DateTime @default(now())
+}
+
+model Vehicle {
+  id              String   @id @default(uuid())
+  vehicleId       String   @unique
+  modelAndPlate   String
+  status          String   @default("Active") // Active, Idle, Maintenance
+  capacity        String
+  location        String
+  driverId        String?
+  driver          User?    @relation("DriverVehicle", fields: [driverId], references: [id])
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
 }
