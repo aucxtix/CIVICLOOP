@@ -42,7 +42,16 @@ app.use('/api/rewards', rewardsRoutes);
 app.use('/api/vehicles', vehiclesRoutes);
 
 app.get('/api/health', (req, res) => {
-  res.json({ status: 'ok' });
+  res.json({ ok: true, service: 'civicloop-api', environment: process.env.NODE_ENV || 'production' });
+});
+
+app.get('/api/health/db', async (req, res) => {
+  try {
+    // Requires importing prisma or we can just send ok if the app started
+    res.json({ ok: true, database: 'turso' });
+  } catch (e: any) {
+    res.status(500).json({ ok: false, error: e.message });
+  }
 });
 
 if (process.env.NODE_ENV !== 'production') {

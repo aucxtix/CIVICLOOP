@@ -113,7 +113,7 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
         <header className="h-20 bg-transparent flex items-center justify-between px-6 lg:px-10 mt-2">
           <div>
             <h1 className="text-2xl font-bold text-foreground flex items-center gap-2">
-              Good morning, {user.name.split(' ')[0]}
+              Good morning, {(user?.name || 'User').split(' ')[0]}
               <span className="text-primary bg-primary/10 rounded-full p-1 inline-flex items-center justify-center">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
               </span>
