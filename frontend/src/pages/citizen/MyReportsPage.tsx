@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Loader2, MapPin, Calendar, Clock, Image as ImageIcon, Scale, AlertTriangle } from 'lucide-react';
+import { Loader2, MapPin, Calendar, Clock, Image as ImageIcon, Headset, AlertTriangle } from 'lucide-react';
 import api from '@/lib/api';
 import { toast } from 'sonner';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
@@ -20,10 +20,10 @@ interface Report {
 const MyReportsPage = () => {
   const [reports, setReports] = useState<Report[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const [isLawyerDialogOpen, setIsLawyerDialogOpen] = useState(false);
-  const [legalIssue, setLegalIssue] = useState('');
-  const [lawyerName, setLawyerName] = useState('');
-  const [lawyerPhone, setLawyerPhone] = useState('');
+  const [isSupportDialogOpen, setIsSupportDialogOpen] = useState(false);
+  const [supportIssue, setSupportIssue] = useState('');
+  const [supportName, setSupportName] = useState('');
+  const [supportPhone, setSupportPhone] = useState('');
 
   useEffect(() => {
     fetchReports();
@@ -53,14 +53,14 @@ const MyReportsPage = () => {
     }
   };
 
-  const handleHireLawyer = (e: React.FormEvent) => {
+  const handleContactSupport = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!legalIssue || !lawyerName || !lawyerPhone) return;
-    toast.success('Your legal request has been submitted. A lawyer will contact you shortly.');
-    setIsLawyerDialogOpen(false);
-    setLegalIssue('');
-    setLawyerName('');
-    setLawyerPhone('');
+    if (!supportIssue || !supportName || !supportPhone) return;
+    toast.success('Your support request has been submitted. Our team will contact you shortly.');
+    setIsSupportDialogOpen(false);
+    setSupportIssue('');
+    setSupportName('');
+    setSupportPhone('');
   };
 
   const pendingReportsCount = reports.filter(r => r.status === 'REPORTED').length;
@@ -82,35 +82,35 @@ const MyReportsPage = () => {
         </div>
         
         {pendingReportsCount > 0 && (
-          <Dialog open={isLawyerDialogOpen} onOpenChange={setIsLawyerDialogOpen}>
+          <Dialog open={isSupportDialogOpen} onOpenChange={setIsSupportDialogOpen}>
             <DialogTrigger asChild>
               <Button variant="destructive" className="font-bold shadow-sm group">
-                <Scale className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
-                Reports Ignored? Hire a Lawyer
+                <Headset className="w-4 h-4 mr-2 group-hover:scale-110 transition-transform" />
+                Reports Ignored? Contact Support
               </Button>
             </DialogTrigger>
             <DialogContent className="sm:max-w-[425px] overflow-hidden p-0 border-none bg-card shadow-2xl">
               <div className="bg-gradient-to-r from-red-500/20 to-red-500/5 p-6 border-b border-border/50 relative overflow-hidden">
                 <div className="absolute top-[-20px] right-[-20px] opacity-10 rotate-12 scale-150">
-                  <Scale className="w-40 h-40 text-destructive" />
+                  <Headset className="w-40 h-40 text-destructive" />
                 </div>
                 <DialogHeader className="relative z-10">
                   <DialogTitle className="text-2xl font-black text-foreground flex items-center gap-2">
-                    <Scale className="w-5 h-5 text-destructive" />
-                    Legal Action
+                    <Headset className="w-5 h-5 text-destructive" />
+                    Customer Support
                   </DialogTitle>
                   <DialogDescription className="text-muted-foreground font-medium">
-                    Are municipalities ignoring illegal dumping? Connect with an environmental lawyer to enforce cleanup laws.
+                    Are your reports being ignored? Connect with our support team to escalate the issue.
                   </DialogDescription>
                 </DialogHeader>
               </div>
               
-              <form onSubmit={handleHireLawyer} className="p-6 space-y-4">
+              <form onSubmit={handleContactSupport} className="p-6 space-y-4">
                 <div className="space-y-4">
                   <div className="p-3 bg-red-500/10 border border-red-500/20 rounded-lg flex items-start gap-3">
                     <AlertTriangle className="w-5 h-5 text-red-500 flex-shrink-0 mt-0.5" />
                     <p className="text-sm text-red-600 font-medium">
-                      You have {pendingReportsCount} pending report(s). Legal representation can force municipal action or penalize private dumpers.
+                      You have {pendingReportsCount} pending report(s). Our support team can help escalate these issues with the local municipality.
                     </p>
                   </div>
 
@@ -123,8 +123,8 @@ const MyReportsPage = () => {
                         id="name"
                         type="text"
                         placeholder="John Doe" 
-                        value={lawyerName}
-                        onChange={(e) => setLawyerName(e.target.value)}
+                        value={supportName}
+                        onChange={(e) => setSupportName(e.target.value)}
                         className="w-full bg-background/50 border border-border/60 rounded-md p-3 focus:outline-none focus:border-destructive focus:ring-1 focus:ring-destructive/20 transition-all shadow-sm text-sm"
                         required
                       />
@@ -137,8 +137,8 @@ const MyReportsPage = () => {
                         id="phone"
                         type="tel"
                         placeholder="+1 (555) 000-0000" 
-                        value={lawyerPhone}
-                        onChange={(e) => setLawyerPhone(e.target.value)}
+                        value={supportPhone}
+                        onChange={(e) => setSupportPhone(e.target.value)}
                         className="w-full bg-background/50 border border-border/60 rounded-md p-3 focus:outline-none focus:border-destructive focus:ring-1 focus:ring-destructive/20 transition-all shadow-sm text-sm"
                         required
                       />
@@ -147,14 +147,14 @@ const MyReportsPage = () => {
 
                   <div className="space-y-2 group">
                     <label htmlFor="issue" className="text-sm font-bold text-foreground group-focus-within:text-destructive transition-colors">
-                      Briefly Describe the Legal Issue
+                      Briefly Describe the Issue
                     </label>
                     <textarea 
                       id="issue"
                       rows={3}
                       placeholder="e.g., Construction company dumping toxic waste for 3 weeks straight with no city response..." 
-                      value={legalIssue}
-                      onChange={(e) => setLegalIssue(e.target.value)}
+                      value={supportIssue}
+                      onChange={(e) => setSupportIssue(e.target.value)}
                       className="w-full bg-background/50 border border-border/60 rounded-md p-3 focus:outline-none focus:border-destructive focus:ring-1 focus:ring-destructive/20 transition-all shadow-sm text-sm"
                       required
                     />
@@ -162,11 +162,11 @@ const MyReportsPage = () => {
                 </div>
                 
                 <div className="pt-4 flex gap-3">
-                  <Button type="button" variant="outline" onClick={() => setIsLawyerDialogOpen(false)} className="flex-1 font-bold">
+                  <Button type="button" variant="outline" onClick={() => setIsSupportDialogOpen(false)} className="flex-1 font-bold">
                     Cancel
                   </Button>
                   <Button type="submit" variant="destructive" className="flex-1 font-bold shadow-md">
-                    Request Consultation
+                    Contact Support
                   </Button>
                 </div>
               </form>
