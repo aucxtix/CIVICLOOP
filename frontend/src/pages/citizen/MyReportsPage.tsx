@@ -22,6 +22,8 @@ const MyReportsPage = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isLawyerDialogOpen, setIsLawyerDialogOpen] = useState(false);
   const [legalIssue, setLegalIssue] = useState('');
+  const [lawyerName, setLawyerName] = useState('');
+  const [lawyerPhone, setLawyerPhone] = useState('');
 
   useEffect(() => {
     fetchReports();
@@ -53,10 +55,12 @@ const MyReportsPage = () => {
 
   const handleHireLawyer = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!legalIssue) return;
+    if (!legalIssue || !lawyerName || !lawyerPhone) return;
     toast.success('Your legal request has been submitted. A lawyer will contact you shortly.');
     setIsLawyerDialogOpen(false);
     setLegalIssue('');
+    setLawyerName('');
+    setLawyerPhone('');
   };
 
   const pendingReportsCount = reports.filter(r => r.status === 'REPORTED').length;
@@ -108,6 +112,37 @@ const MyReportsPage = () => {
                     <p className="text-sm text-red-600 font-medium">
                       You have {pendingReportsCount} pending report(s). Legal representation can force municipal action or penalize private dumpers.
                     </p>
+                  </div>
+
+                  <div className="grid grid-cols-2 gap-4">
+                    <div className="space-y-2 group">
+                      <label htmlFor="name" className="text-sm font-bold text-foreground group-focus-within:text-destructive transition-colors">
+                        Full Name
+                      </label>
+                      <input 
+                        id="name"
+                        type="text"
+                        placeholder="John Doe" 
+                        value={lawyerName}
+                        onChange={(e) => setLawyerName(e.target.value)}
+                        className="w-full bg-background/50 border border-border/60 rounded-md p-3 focus:outline-none focus:border-destructive focus:ring-1 focus:ring-destructive/20 transition-all shadow-sm text-sm"
+                        required
+                      />
+                    </div>
+                    <div className="space-y-2 group">
+                      <label htmlFor="phone" className="text-sm font-bold text-foreground group-focus-within:text-destructive transition-colors">
+                        Phone Number
+                      </label>
+                      <input 
+                        id="phone"
+                        type="tel"
+                        placeholder="+1 (555) 000-0000" 
+                        value={lawyerPhone}
+                        onChange={(e) => setLawyerPhone(e.target.value)}
+                        className="w-full bg-background/50 border border-border/60 rounded-md p-3 focus:outline-none focus:border-destructive focus:ring-1 focus:ring-destructive/20 transition-all shadow-sm text-sm"
+                        required
+                      />
+                    </div>
                   </div>
 
                   <div className="space-y-2 group">

@@ -15,6 +15,7 @@ const tickets = [
 
 const AdminTicketsPage = () => {
   const [open, setOpen] = useState(false);
+  const [selectedTicket, setSelectedTicket] = useState<any>(null);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -76,7 +77,11 @@ const AdminTicketsPage = () => {
             <CardContent>
               <div className="space-y-4">
                 {tickets.map((ticket) => (
-                  <div key={ticket.id} className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-xl hover:bg-background transition-colors gap-4">
+                  <div 
+                    key={ticket.id} 
+                    className="flex flex-col sm:flex-row sm:items-center justify-between p-4 border rounded-xl hover:bg-slate-50 dark:hover:bg-slate-900 transition-colors gap-4 cursor-pointer"
+                    onClick={() => setSelectedTicket(ticket)}
+                  >
                     <div className="flex items-start gap-4">
                       <div className={`p-2 rounded-lg mt-1 ${ticket.priority === 'high' ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'}`}>
                         {ticket.priority === 'high' ? <AlertTriangle className="w-5 h-5" /> : <MessageSquare className="w-5 h-5" />}
@@ -107,6 +112,43 @@ const AdminTicketsPage = () => {
                     </div>
                   </div>
                 ))}
+
+              <Dialog open={!!selectedTicket} onOpenChange={(isOpen) => !isOpen && setSelectedTicket(null)}>
+                <DialogContent className="sm:max-w-[500px]">
+                  {selectedTicket && (
+                    <>
+                      <DialogHeader>
+                        <div className="flex items-center gap-3 mb-2">
+                          <Badge variant="outline">{selectedTicket.id}</Badge>
+                          <Badge className={
+                            selectedTicket.priority === 'high' ? 'bg-red-100 text-red-700' : 'bg-amber-100 text-amber-700'
+                          }>
+                            {selectedTicket.priority.toUpperCase()} PRIORITY
+                          </Badge>
+                        </div>
+                        <DialogTitle className="text-xl">{selectedTicket.subject}</DialogTitle>
+                        <DialogDescription>
+                          Reported by <span className="font-medium text-foreground">{selectedTicket.user}</span> • {selectedTicket.date}
+                        </DialogDescription>
+                      </DialogHeader>
+                      <div className="py-4 border-y my-4">
+                        <h4 className="text-sm font-semibold mb-2">Ticket Description</h4>
+                        <p className="text-sm text-muted-foreground">
+                          User reported an issue regarding: {selectedTicket.subject}. 
+                          Further investigation is required by the support team to resolve this matter.
+                        </p>
+                      </div>
+                      <DialogFooter className="flex justify-between w-full sm:justify-between">
+                         <div className="flex gap-2">
+                           <Button variant="outline" size="sm">Assign</Button>
+                           <Button variant="outline" size="sm">Reply</Button>
+                         </div>
+                         <Button onClick={() => setSelectedTicket(null)}>Close</Button>
+                      </DialogFooter>
+                    </>
+                  )}
+                </DialogContent>
+              </Dialog>
               </div>
             </CardContent>
           </Card>
