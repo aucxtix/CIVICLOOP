@@ -50,6 +50,10 @@ import AdminHotspotsPage from '@/pages/admin/AdminHotspotsPage';
 import AdminAnalyticsPage from '@/pages/admin/AdminAnalyticsPage';
 import AdminRewardsPage from '@/pages/admin/AdminRewardsPage';
 import AdminSettingsPage from '@/pages/admin/AdminSettingsPage';
+import CityIntelligencePage from '@/pages/admin/CityIntelligencePage';
+
+import EcoImpactPage from '@/pages/citizen/EcoImpactPage';
+import SmartRouteOptimizerPage from '@/pages/worker/SmartRouteOptimizerPage';
 
 // Auth Guard Placeholder
 import ProtectedRoute from '@/components/layout/ProtectedRoute';
@@ -82,6 +86,7 @@ function App() {
               <Route path="notifications" element={<NotificationsPage />} />
               <Route path="analytics" element={<AnalyticsPage />} />
               <Route path="points" element={<GreenPointsPage />} />
+              <Route path="eco-impact" element={<EcoImpactPage />} />
               <Route path="profile" element={<ProfilePage />} />
               <Route path="settings" element={<SettingsPage />} />
             </Route>
@@ -94,6 +99,7 @@ function App() {
               <Route path="vehicle" element={<WorkerVehicleNavigationPage />} />
               <Route path="map" element={<WorkerMapPage />} />
               <Route path="performance" element={<WorkerPerformancePage />} />
+              <Route path="route-optimizer" element={<SmartRouteOptimizerPage />} />
               <Route path="profile" element={<WorkerProfilePage />} />
               <Route path="settings" element={<WorkerSettingsPage />} />
             </Route>
@@ -110,6 +116,7 @@ function App() {
               <Route path="hotspots" element={<AdminHotspotsPage />} />
               <Route path="analytics" element={<AdminAnalyticsPage />} />
               <Route path="rewards" element={<AdminRewardsPage />} />
+              <Route path="intelligence" element={<CityIntelligencePage />} />
               <Route path="settings" element={<AdminSettingsPage />} />
             </Route>
           </Route>

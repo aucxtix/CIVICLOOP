@@ -6,7 +6,8 @@ import { ModeToggle } from '@/components/mode-toggle';
 import { 
   LogOut, Menu, LayoutDashboard, ScanLine, Clock, 
   Trash2, MapPin, Truck, Calendar, Bell, 
-  BarChart2, Leaf, User, Settings, ShieldCheck, AlertTriangle
+  BarChart2, Leaf, User, Settings, ShieldCheck, AlertTriangle,
+  Brain, Zap, Globe2
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -38,6 +39,7 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
     { name: 'Notifications', icon: Bell, path: '/citizen/notifications' },
     { name: 'Analytics', icon: BarChart2, path: '/citizen/analytics' },
     { name: 'Green Points', icon: Leaf, path: '/citizen/points' },
+    { name: '🌍 Eco Impact', icon: Globe2, path: '/citizen/eco-impact' },
     { name: 'Profile', icon: User, path: '/citizen/profile' },
     { name: 'Settings', icon: Settings, path: '/citizen/settings' },
   ];
@@ -49,6 +51,7 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
     { name: 'Vehicle Nav', icon: Truck, path: '/worker/vehicle' },
     { name: 'Live Map', icon: MapPin, path: '/worker/map' },
     { name: 'Performance', icon: BarChart2, path: '/worker/performance' },
+    { name: '⚡ Route Optimizer', icon: Zap, path: '/worker/route-optimizer' },
     { name: 'Profile', icon: User, path: '/worker/profile' },
     { name: 'Settings', icon: Settings, path: '/worker/settings' },
   ];
@@ -64,6 +67,7 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
     { name: 'Hotspots', icon: AlertTriangle, path: '/admin/hotspots' },
     { name: 'Analytics', icon: BarChart2, path: '/admin/analytics' },
     { name: 'Rewards', icon: Leaf, path: '/admin/rewards' },
+    { name: '🧠 AI Intelligence', icon: Brain, path: '/admin/intelligence' },
     { name: 'Settings', icon: Settings, path: '/admin/settings' },
   ];
 
