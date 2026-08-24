@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import api from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -40,7 +42,19 @@ const LEADERBOARD = [
 ];
 
 const EcoImpactPage = () => {
-  const [civicCredits] = useState(1250);
+  const { user, login, token } = useAuthStore();
+  const [civicCredits, setCivicCredits] = useState(user?.civicCredits || 0);
+
+  useEffect(() => {
+    const fetchMe = async () => {
+      try {
+        const res = await api.get('/auth/me');
+        setCivicCredits(res.data.civicCredits);
+        if (token) login(res.data, token);
+      } catch (err) {}
+    };
+    fetchMe();
+  }, [login, token]);
   const [showShareModal, setShowShareModal] = useState(false);
   const [claimedChallenge, setClaimedChallenge] = useState<number | null>(null);
 
@@ -51,9 +65,15 @@ const EcoImpactPage = () => {
     ? ((civicCredits - currentLevel.minPoints) / (nextLevel.minPoints - currentLevel.minPoints)) * 100
     : 100;
 
-  const handleClaimChallenge = (id: number, reward: number) => {
-    setClaimedChallenge(id);
-    toast.success(`🎉 +${reward} Green Points earned!`);
+  const handleClaimChallenge = async (id: number, reward: number, title: string) => {
+    try {
+      await api.post('/auth/claim-challenge', { reward, challengeTitle: title });
+      setClaimedChallenge(id);
+      setCivicCredits(prev => prev + reward);
+      toast.success(`🎉 +${reward} Green Points earned!`);
+    } catch (err) {
+      toast.error('Failed to claim points.');
+    }
   };
 
   const handleShare = () => {
@@ -181,7 +201,7 @@ const EcoImpactPage = () => {
                           {ch.done && claimedChallenge !== ch.id && (
                             <Button
                               size="sm"
-                              onClick={() => handleClaimChallenge(ch.id, ch.reward)}
+                              onClick={() => handleClaimChallenge(ch.id, ch.reward, ch.title)}
                               className="h-6 text-xs bg-green-500 hover:bg-green-600 text-white font-bold px-2"
                             >
                               Claim!

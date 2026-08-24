@@ -4,10 +4,18 @@ import { Button } from '@/components/ui/button';
 import { 
   ArrowRight, Leaf, ShieldCheck, Zap, 
   MapPin, Truck, Camera, CheckCircle2, TrendingUp,
-  Smartphone, Globe, Recycle
+  Smartphone, Globe, Recycle, Star, Award
 } from 'lucide-react';
 import { motion, useScroll, useTransform } from 'framer-motion';
 import { ModeToggle } from '@/components/mode-toggle';
+
+const LANDING_LEADERBOARD = [
+  { rank: 1, name: 'Riya Sharma',    points: 4820, badge: '🌲', city: 'Ward 3' },
+  { rank: 2, name: 'Aryan Mehta',    points: 3900, badge: '🌳', city: 'Ward 1' },
+  { rank: 3, name: 'Vikram Singh',   points: 3100, badge: '🌿', city: 'Ward 4' },
+  { rank: 4, name: 'Priya Nair',     points: 980,  badge: '🌱', city: 'Ward 5' },
+  { rank: 5, name: 'Karthik Raj',    points: 720,  badge: '🌱', city: 'Ward 4' },
+];
 
 const HomePage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -260,6 +268,54 @@ const HomePage = () => {
             </div>
           </motion.div>
 
+        </div>
+      </div>
+
+      {/* Community Leaderboard Section */}
+      <div className="bg-background py-24 relative z-20 border-t border-border/50">
+        <div className="max-w-4xl mx-auto px-6 lg:px-12">
+          <div className="text-center mb-12">
+            <h2 className="text-3xl font-bold mb-2">Top <span className="text-primary">Community</span> Contributors</h2>
+            <p className="text-muted-foreground">Recognizing the citizens making the biggest impact in our city this month.</p>
+          </div>
+          
+          <div className="bg-card rounded-3xl border border-border/60 shadow-2xl p-2 sm:p-6 overflow-hidden">
+            <div className="divide-y divide-border">
+              {LANDING_LEADERBOARD.map((entry, i) => (
+                <motion.div
+                  key={entry.rank}
+                  initial={{ opacity: 0, y: 10 }}
+                  whileInView={{ opacity: 1, y: 0 }}
+                  viewport={{ once: true }}
+                  transition={{ delay: i * 0.1 }}
+                  className="flex items-center gap-4 px-4 py-4 hover:bg-muted/50 rounded-2xl transition-colors"
+                >
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-black text-lg shadow-sm ${
+                    entry.rank === 1 ? 'bg-amber-100 text-amber-600' :
+                    entry.rank === 2 ? 'bg-slate-100 text-slate-600' :
+                    entry.rank === 3 ? 'bg-orange-100 text-orange-600' : 'bg-muted text-muted-foreground'
+                  }`}>
+                    {entry.rank <= 3 ? ['🥇','🥈','🥉'][entry.rank - 1] : `#${entry.rank}`}
+                  </div>
+                  <div className="text-3xl hidden sm:block">{entry.badge}</div>
+                  <div className="flex-1 min-w-0">
+                    <div className="font-bold text-lg text-foreground truncate">{entry.name}</div>
+                    <div className="text-sm text-muted-foreground truncate">{entry.city}</div>
+                  </div>
+                  <div className="flex items-center gap-1.5 bg-primary/10 px-4 py-2 rounded-full">
+                    <Star className="w-4 h-4 text-primary fill-primary" />
+                    <span className="font-black text-primary">{entry.points.toLocaleString()} <span className="text-xs font-bold hidden sm:inline">pts</span></span>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+            
+            <div className="mt-8 text-center">
+              <Button asChild variant="ghost" className="font-bold text-primary hover:text-primary hover:bg-primary/10 rounded-full">
+                <Link to="/register">Join the Leaderboard <ArrowRight className="w-4 h-4 ml-2" /></Link>
+              </Button>
+            </div>
+          </div>
         </div>
       </div>
 
