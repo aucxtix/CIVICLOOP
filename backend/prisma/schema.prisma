@@ -1,0 +1,106 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Get a free hosted Postgres database in seconds: `npx create-db`
+
+generator client {
+  provider        = "prisma-client-js"
+  previewFeatures = ["driverAdapters"]
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+model User {
+  id            String   @id @default(uuid())
+  name          String
+  email         String   @unique
+  password      String
+  phone         String?
+  avatar        String?
+  role          String   @default("CITIZEN") // CITIZEN, WORKER, ADMIN
+  city          String?
+  ward          String?
+  status        String   @default("ACTIVE")
+  civicCredits  Int      @default(0)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  reportsAsCitizen Report[] @relation("CitizenReports")
+  tasksAsWorker    Report[] @relation("WorkerTasks")
+  transactions     Transaction[]
+}
+
+model Report {
+  id              String   @id @default(uuid())
+  citizenId       String
+  workerId        String?
+  
+  imageUrl        String
+  afterImageUrl   String?
+  description     String?
+  category        String?  // Organic, Plastic, Paper, Glass, Metal, E-Waste, Mixed, Other
+  aiConfidence    Float?
+  
+  latitude        Float
+  longitude       Float
+  address         String?
+  
+  status          String   @default("REPORTED") // REPORTED, ASSIGNED, EN_ROUTE, ARRIVED, IN_PROGRESS, COMPLETED, VERIFIED, REOPENED
+  priority        String   @default("NORMAL")
+  civicTrustScore Int?
+  
+  citizen         User     @relation("CitizenReports", fields: [citizenId], references: [id])
+  worker          User?    @relation("WorkerTasks", fields: [workerId], references: [id])
+
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model CollectionPoint {
+  id          String   @id @default(uuid())
+  name        String
+  latitude    Float
+  longitude   Float
+  address     String
+  categories  String   // JSON string or comma-separated list of accepted waste
+  openingHours String?
+  capacity    String?
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Reward {
+  id              String   @id @default(uuid())
+  name            String
+  description     String
+  imageUrl        String?
+  creditsRequired Int
+  stock           Int
+  partner         String
+  isActive        Boolean  @default(true)
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
+model Transaction {
+  id          String   @id @default(uuid())
+  userId      String
+  amount      Int      // Positive for earned, negative for spent
+  type        String   // EARN_REPORT, EARN_VERIFY, SPEND_REWARD, etc.
+  description String
+  user        User     @relation(fields: [userId], references: [id])
+  createdAt   DateTime @default(now())
+}
+
+model AuditLog {
+  id        String   @id @default(uuid())
+  userId    String?
+  action    String
+  targetId  String?
+  metadata  String?  // JSON string
+  timestamp DateTime @default(now())
+}

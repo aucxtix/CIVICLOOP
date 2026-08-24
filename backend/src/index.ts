@@ -1,0 +1,46 @@
+import express from 'express';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import helmet from 'helmet';
+import compression from 'compression';
+import rateLimit from 'express-rate-limit';
+import authRoutes from './routes/auth.js';
+import reportsRoutes from './routes/reports.js';
+import adminRoutes from './routes/admin.js';
+import aiRoutes from './routes/ai.js';
+
+dotenv.config();
+
+const app = express();
+const port = process.env.PORT || 3000;
+
+// Security and Performance Middlewares
+app.use(helmet());
+app.use(compression());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || 'http://localhost:5173', // Or wherever the frontend runs
+  credentials: true,
+}));
+
+// Rate Limiting
+const limiter = rateLimit({
+  windowMs: 15 * 60 * 1000, // 15 minutes
+  max: 100, // limit each IP to 100 requests per windowMs
+  message: 'Too many requests from this IP, please try again later.',
+});
+app.use('/api/', limiter);
+
+app.use(express.json({ limit: '10mb' })); // Support larger payload for images later
+
+app.use('/api/auth', authRoutes);
+app.use('/api/reports', reportsRoutes);
+app.use('/api/admin', adminRoutes);
+app.use('/api/ai', aiRoutes);
+
+app.get('/api/health', (req, res) => {
+  res.json({ status: 'ok' });
+});
+
+app.listen(port, () => {
+  console.log(`CivicLoop Backend running on http://localhost:${port}`);
+});

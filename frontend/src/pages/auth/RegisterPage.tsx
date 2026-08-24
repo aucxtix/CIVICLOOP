@@ -1,0 +1,194 @@
+import { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Leaf, Loader2, ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
+import { motion } from 'framer-motion';
+import api from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
+
+const registerSchema = z.object({
+  name: z.string().min(2, { message: 'Name must be at least 2 characters' }),
+  email: z.string().email({ message: 'Please enter a valid email address' }),
+  password: z.string().min(6, { message: 'Password must be at least 6 characters' }),
+  confirmPassword: z.string()
+}).refine((data) => data.password === data.confirmPassword, {
+  message: "Passwords don't match",
+  path: ["confirmPassword"],
+});
+
+type RegisterFormValues = z.infer<typeof registerSchema>;
+
+const RegisterPage = () => {
+  const navigate = useNavigate();
+  const login = useAuthStore((state) => state.login);
+  const [isLoading, setIsLoading] = useState(false);
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm<RegisterFormValues>({
+    resolver: zodResolver(registerSchema),
+  });
+
+  const onSubmit = async (data: RegisterFormValues) => {
+    setIsLoading(true);
+    try {
+      const response = await api.post('/auth/register', {
+        name: data.name,
+        email: data.email,
+        password: data.password,
+        role: 'CITIZEN' // Default role for open registrations
+      });
+      
+      const { user, token } = response.data;
+      login(user, token);
+      toast.success('Account created successfully!');
+      navigate('/citizen');
+      
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <div className="min-h-screen flex items-center justify-center bg-background relative overflow-hidden font-sans selection:bg-green-200">
+      {/* Background Graphic */}
+      <div className="absolute inset-0 z-0 flex items-center justify-center pointer-events-none overflow-hidden">
+        <div className="absolute top-[-10%] left-[-5%] w-[800px] h-[800px] rounded-full bg-blue-200/40 blur-[120px]"></div>
+        <div className="absolute bottom-[-10%] right-[-10%] w-[600px] h-[600px] rounded-full bg-green-200/40 blur-[120px]"></div>
+        <div className="absolute inset-0 bg-[url('https://images.unsplash.com/photo-1497435334941-8c899ee9e8e9?ixlib=rb-4.0.3&auto=format&fit=crop&w=2000&q=80')] bg-cover bg-center opacity-[0.03] mix-blend-multiply"></div>
+      </div>
+
+      <div className="w-full max-w-5xl z-10 flex shadow-2xl rounded-3xl overflow-hidden bg-card/70 backdrop-blur-2xl border border-white m-4">
+        
+        {/* Left Side - Image/Branding */}
+        <div className="hidden md:flex md:w-1/2 relative bg-green-900 overflow-hidden items-end p-12">
+          <div className="absolute inset-0">
+             <img src="/login-bg.png" alt="Sustainable City" className="w-full h-full object-cover opacity-80 mix-blend-overlay" />
+             <div className="absolute inset-0 bg-gradient-to-t from-green-950 via-green-900/60 to-transparent"></div>
+          </div>
+          <div className="relative z-10 text-white space-y-6">
+            <Link to="/" className="inline-flex items-center gap-2 mb-8">
+              <Leaf className="w-8 h-8 text-green-400" />
+              <span className="text-2xl font-extrabold tracking-tight">CivicLoop</span>
+            </Link>
+            <motion.h2 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.2, duration: 0.8 }}
+              className="text-4xl font-black leading-tight"
+            >
+              Start making a difference today.
+            </motion.h2>
+            <motion.p 
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.4, duration: 0.8 }}
+              className="text-green-100 font-medium text-lg leading-relaxed max-w-md"
+            >
+              Sign up to classify waste with AI, report environmental issues, and earn green rewards.
+            </motion.p>
+          </div>
+        </div>
+
+        {/* Right Side - Form */}
+        <motion.div 
+          initial={{ opacity: 0, x: 20 }}
+          animate={{ opacity: 1, x: 0 }}
+          transition={{ duration: 0.6, ease: "easeOut" }}
+          className="w-full md:w-1/2 p-8 md:p-12 lg:p-16 flex flex-col justify-center bg-card"
+        >
+          <div className="mb-8 text-center md:text-left">
+            <h3 className="text-3xl font-black text-foreground mb-2">Create an account</h3>
+            <p className="text-muted-foreground font-medium">Join CivicLoop and make an impact.</p>
+          </div>
+          
+          <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-foreground uppercase tracking-wider">Full Name</label>
+              <Input
+                {...register('name')}
+                placeholder="John Doe"
+                className="bg-background border-border h-12 rounded-xl text-sm focus-visible:ring-green-500 transition-shadow"
+                disabled={isLoading}
+              />
+              {errors.name && (
+                <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="text-xs text-red-500 font-medium">{errors.name.message}</motion.p>
+              )}
+            </div>
+
+            <div className="space-y-1">
+              <label className="text-xs font-bold text-foreground uppercase tracking-wider">Email Address</label>
+              <Input
+                {...register('email')}
+                type="email"
+                placeholder="name@example.com"
+                className="bg-background border-border h-12 rounded-xl text-sm focus-visible:ring-green-500 transition-shadow"
+                disabled={isLoading}
+              />
+              {errors.email && (
+                <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="text-xs text-red-500 font-medium">{errors.email.message}</motion.p>
+              )}
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-foreground uppercase tracking-wider">Password</label>
+                <Input
+                  {...register('password')}
+                  type="password"
+                  placeholder="••••••••"
+                  className="bg-background border-border h-12 rounded-xl text-sm focus-visible:ring-green-500 transition-shadow"
+                  disabled={isLoading}
+                />
+                {errors.password && (
+                  <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="text-xs text-red-500 font-medium">{errors.password.message}</motion.p>
+                )}
+              </div>
+              <div className="space-y-1">
+                <label className="text-xs font-bold text-foreground uppercase tracking-wider">Confirm</label>
+                <Input
+                  {...register('confirmPassword')}
+                  type="password"
+                  placeholder="••••••••"
+                  className="bg-background border-border h-12 rounded-xl text-sm focus-visible:ring-green-500 transition-shadow"
+                  disabled={isLoading}
+                />
+                {errors.confirmPassword && (
+                  <motion.p initial={{ opacity: 0, height: 0 }} animate={{ opacity: 1, height: 'auto' }} className="text-xs text-red-500 font-medium">{errors.confirmPassword.message}</motion.p>
+                )}
+              </div>
+            </div>
+            
+            <Button type="submit" className="w-full h-12 text-base font-bold mt-6 shadow-xl shadow-green-600/20 bg-green-600 hover:bg-green-700 rounded-xl transition-all group" disabled={isLoading}>
+              {isLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Creating account...
+                </>
+              ) : (
+                <>Sign Up <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" /></>
+              )}
+            </Button>
+          </form>
+
+          <div className="mt-8 pt-6 border-t border-border text-center text-sm text-muted-foreground font-medium">
+            Already have an account?{' '}
+            <Link to="/login" className="text-green-600 hover:text-green-700 font-bold hover:underline transition-all">
+              Log in instead
+            </Link>
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+};
+
+export default RegisterPage;
