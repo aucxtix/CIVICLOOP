@@ -1,8 +1,10 @@
 import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Gift, Edit, Trash2, Loader2, Plus } from 'lucide-react';
+import { Gift, Edit, Trash2, Loader2, Plus, Star } from 'lucide-react';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import api from '@/lib/api';
 
 interface Reward {
@@ -45,24 +47,24 @@ const AdminRewardsPage = () => {
     }
   };
 
-  const handleAddReward = async () => {
-    const name = prompt('Enter Reward Name:');
-    if (!name) return;
-    const credits = prompt('Enter Credits Required (e.g., 500):');
-    if (!credits) return;
-    const stock = prompt('Enter Stock Quantity:');
-    if (!stock) return;
-    const partner = prompt('Enter Partner Name:');
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newReward, setNewReward] = useState({ name: '', credits: '', stock: '', partner: '' });
+
+  const handleAddReward = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newReward.name || !newReward.credits || !newReward.stock) return;
     
     try {
       await api.post('/rewards', {
-        name,
-        description: `Get ${name} from ${partner || 'our partners'}.`,
-        creditsRequired: credits,
-        stock: stock,
-        partner: partner || 'Internal'
+        name: newReward.name,
+        description: `Get ${newReward.name} from ${newReward.partner || 'our partners'}.`,
+        creditsRequired: newReward.credits,
+        stock: newReward.stock,
+        partner: newReward.partner || 'Internal'
       });
       toast.success('Reward added successfully');
+      setNewReward({ name: '', credits: '', stock: '', partner: '' });
+      setIsDialogOpen(false);
       fetchRewards();
     } catch (error) {
       toast.error('Failed to add reward');
@@ -84,9 +86,100 @@ const AdminRewardsPage = () => {
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Rewards Catalog</h1>
           <p className="text-muted-foreground mt-1">Manage green point redemption items and partners.</p>
         </div>
-        <Button onClick={handleAddReward} className="bg-primary text-primary-foreground hover:bg-primary/90">
-          <Plus className="w-4 h-4 mr-2" /> Add Reward
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-primary text-primary-foreground hover:bg-primary/90 shadow-sm font-bold">
+              <Plus className="w-4 h-4 mr-2" /> Add Reward
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] overflow-hidden p-0 border-none bg-card shadow-2xl">
+            <div className="bg-gradient-to-r from-amber-500/20 to-amber-500/5 p-6 border-b border-border/50 relative overflow-hidden">
+              <div className="absolute top-[-20px] right-[-20px] opacity-10 rotate-12 scale-150">
+                <Gift className="w-40 h-40 text-amber-500" />
+              </div>
+              <DialogHeader className="relative z-10">
+                <DialogTitle className="text-2xl font-black text-foreground flex items-center gap-2">
+                  <Star className="w-5 h-5 text-amber-500" />
+                  New Reward
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground font-medium">
+                  Create a new incentive for citizens to redeem with Green Points.
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            
+            <form onSubmit={handleAddReward} className="p-6 space-y-4">
+              <div className="grid grid-cols-1 gap-4">
+                <div className="space-y-2 group">
+                  <label htmlFor="name" className="text-sm font-bold text-foreground group-focus-within:text-amber-500 transition-colors">
+                    Reward Name
+                  </label>
+                  <Input 
+                    id="name"
+                    placeholder="e.g., Free Coffee" 
+                    value={newReward.name}
+                    onChange={(e) => setNewReward({...newReward, name: e.target.value})}
+                    className="bg-background/50 border-border/60 focus:border-amber-500 focus:ring-amber-500/20 transition-all shadow-sm h-11"
+                    required
+                  />
+                </div>
+                
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2 group">
+                    <label htmlFor="credits" className="text-sm font-bold text-foreground group-focus-within:text-amber-500 transition-colors">
+                      Points Cost
+                    </label>
+                    <Input 
+                      id="credits"
+                      type="number"
+                      placeholder="e.g., 500" 
+                      value={newReward.credits}
+                      onChange={(e) => setNewReward({...newReward, credits: e.target.value})}
+                      className="bg-background/50 border-border/60 focus:border-amber-500 focus:ring-amber-500/20 transition-all font-mono shadow-sm h-11"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2 group">
+                    <label htmlFor="stock" className="text-sm font-bold text-foreground group-focus-within:text-amber-500 transition-colors">
+                      Initial Stock
+                    </label>
+                    <Input 
+                      id="stock"
+                      type="number"
+                      placeholder="e.g., 100" 
+                      value={newReward.stock}
+                      onChange={(e) => setNewReward({...newReward, stock: e.target.value})}
+                      className="bg-background/50 border-border/60 focus:border-amber-500 focus:ring-amber-500/20 transition-all font-mono shadow-sm h-11"
+                      required
+                    />
+                  </div>
+                </div>
+
+                <div className="space-y-2 group">
+                  <label htmlFor="partner" className="text-sm font-bold text-foreground group-focus-within:text-amber-500 transition-colors">
+                    Partner / Sponsor
+                  </label>
+                  <Input 
+                    id="partner"
+                    placeholder="e.g., Local Cafe" 
+                    value={newReward.partner}
+                    onChange={(e) => setNewReward({...newReward, partner: e.target.value})}
+                    className="bg-background/50 border-border/60 focus:border-amber-500 focus:ring-amber-500/20 transition-all shadow-sm h-11"
+                  />
+                </div>
+              </div>
+              
+              <div className="pt-4 flex gap-3">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1 font-bold">
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1 font-bold shadow-md bg-amber-500 hover:bg-amber-600 text-white">
+                  Create Reward
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {rewards.length === 0 ? (

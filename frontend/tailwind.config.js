@@ -17,7 +17,7 @@ export default {
     },
     extend: {
       fontFamily: {
-        sans: ['"Permanent Marker"', 'cursive'],
+        sans: ['"Geist Variable"', 'sans-serif'],
       },
       colors: {
         border: "hsl(var(--border))",

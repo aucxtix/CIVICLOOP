@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Truck, Users, Activity, Navigation, Settings, Loader2 } from 'lucide-react';
+import { Truck, Users, Activity, Navigation, Settings, Loader2, Plus } from 'lucide-react';
 import { toast } from 'sonner';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import api from '@/lib/api';
 
 interface Vehicle {
@@ -35,18 +37,21 @@ const AdminVehicleRegistryPage = () => {
     }
   };
 
-  const handleAddVehicle = async () => {
-    const id = prompt('Enter Vehicle ID (e.g., V-005):');
-    if (!id) return;
-    const model = prompt('Enter Model & Plate:');
-    if (!model) return;
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [newVehicle, setNewVehicle] = useState({ id: '', model: '' });
+
+  const handleAddVehicle = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newVehicle.id || !newVehicle.model) return;
 
     try {
       await api.post('/vehicles', {
-        vehicleId: id,
-        modelAndPlate: model
+        vehicleId: newVehicle.id,
+        modelAndPlate: newVehicle.model
       });
       toast.success('Vehicle added successfully!');
+      setNewVehicle({ id: '', model: '' });
+      setIsDialogOpen(false);
       fetchVehicles();
     } catch (error) {
       toast.error('Failed to add vehicle');
@@ -86,9 +91,73 @@ const AdminVehicleRegistryPage = () => {
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Vehicle Registry</h1>
           <p className="text-muted-foreground mt-1">Manage fleet, assign vehicles to workers, and track status.</p>
         </div>
-        <Button className="font-bold shadow-sm" onClick={handleAddVehicle}>
-          <Truck className="mr-2 h-4 w-4" /> Add New Vehicle
-        </Button>
+        <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="font-bold shadow-sm bg-primary text-primary-foreground hover:bg-primary/90">
+              <Plus className="mr-2 h-4 w-4" /> Add New Vehicle
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px] overflow-hidden p-0 border-none bg-card shadow-2xl">
+            <div className="bg-gradient-to-r from-primary/10 to-primary/5 p-6 border-b border-border/50 relative overflow-hidden">
+              <div className="absolute top-[-20px] right-[-20px] opacity-10 rotate-12 scale-150">
+                <Truck className="w-40 h-40 text-primary" />
+              </div>
+              <DialogHeader className="relative z-10">
+                <DialogTitle className="text-2xl font-black text-foreground flex items-center gap-2">
+                  <Truck className="w-5 h-5 text-primary" />
+                  Register Vehicle
+                </DialogTitle>
+                <DialogDescription className="text-muted-foreground font-medium">
+                  Add a new vehicle to the municipal fleet dispatch.
+                </DialogDescription>
+              </DialogHeader>
+            </div>
+            
+            <form onSubmit={handleAddVehicle} className="p-6 space-y-5">
+              <div className="space-y-4">
+                <div className="space-y-2 group">
+                  <label htmlFor="vid" className="text-sm font-bold text-foreground group-focus-within:text-primary transition-colors">
+                    Vehicle ID
+                  </label>
+                  <div className="relative">
+                    <Input 
+                      id="vid"
+                      type="text"
+                      placeholder="e.g., V-005" 
+                      value={newVehicle.id}
+                      onChange={(e) => setNewVehicle({...newVehicle, id: e.target.value})}
+                      className="bg-background/50 border-border/60 focus:border-primary focus:ring-primary/20 transition-all font-mono pl-3 shadow-sm h-11"
+                      required
+                    />
+                  </div>
+                </div>
+                <div className="space-y-2 group">
+                  <label htmlFor="model" className="text-sm font-bold text-foreground group-focus-within:text-primary transition-colors">
+                    Model & Plate
+                  </label>
+                  <Input 
+                    id="model"
+                    type="text"
+                    placeholder="e.g., Volvo FL (MH 01 EA 1234)" 
+                    value={newVehicle.model}
+                    onChange={(e) => setNewVehicle({...newVehicle, model: e.target.value})}
+                    className="bg-background/50 border-border/60 focus:border-primary focus:ring-primary/20 transition-all shadow-sm h-11"
+                    required
+                  />
+                </div>
+              </div>
+              
+              <div className="pt-4 flex gap-3">
+                <Button type="button" variant="outline" onClick={() => setIsDialogOpen(false)} className="flex-1 font-bold">
+                  Cancel
+                </Button>
+                <Button type="submit" className="flex-1 font-bold shadow-md bg-primary hover:bg-primary/90 text-white">
+                  Confirm Registry
+                </Button>
+              </div>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
       
       <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
