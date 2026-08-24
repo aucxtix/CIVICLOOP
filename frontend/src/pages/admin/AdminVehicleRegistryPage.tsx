@@ -38,24 +38,35 @@ const AdminVehicleRegistryPage = () => {
   };
 
   const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [newVehicle, setNewVehicle] = useState({ id: '', model: '' });
+  const [newVehicle, setNewVehicle] = useState({ id: '', model: '', plate: '' });
 
   const handleAddVehicle = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newVehicle.id || !newVehicle.model) return;
+    if (!newVehicle.id || !newVehicle.model || !newVehicle.plate) return;
 
     try {
       await api.post('/vehicles', {
         vehicleId: newVehicle.id,
-        modelAndPlate: newVehicle.model
+        modelAndPlate: `${newVehicle.model} (${newVehicle.plate})`
       });
       toast.success('Vehicle added successfully!');
-      setNewVehicle({ id: '', model: '' });
+      setNewVehicle({ id: '', model: '', plate: '' });
       setIsDialogOpen(false);
       fetchVehicles();
     } catch (error) {
       toast.error('Failed to add vehicle');
     }
+  };
+
+  const handlePlateChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    let val = e.target.value.replace(/[^a-zA-Z0-9]/g, '').toUpperCase();
+    let formatted = '';
+    if (val.length > 0) formatted += val.substring(0, 2);
+    if (val.length > 2) formatted += '-' + val.substring(2, 4);
+    if (val.length > 4) formatted += '-' + val.substring(4, 6);
+    if (val.length > 6) formatted += '-' + val.substring(6, 10);
+    
+    setNewVehicle(prev => ({ ...prev, plate: formatted }));
   };
 
   const handleAssign = async (id: string) => {
@@ -131,19 +142,36 @@ const AdminVehicleRegistryPage = () => {
                     />
                   </div>
                 </div>
-                <div className="space-y-2 group">
-                  <label htmlFor="model" className="text-sm font-bold text-foreground group-focus-within:text-primary transition-colors">
-                    Model & Plate
-                  </label>
-                  <Input 
-                    id="model"
-                    type="text"
-                    placeholder="e.g., Volvo FL (MH 01 EA 1234)" 
-                    value={newVehicle.model}
-                    onChange={(e) => setNewVehicle({...newVehicle, model: e.target.value})}
-                    className="bg-background/50 border-border/60 focus:border-primary focus:ring-primary/20 transition-all shadow-sm h-11"
-                    required
-                  />
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2 group">
+                    <label htmlFor="model" className="text-sm font-bold text-foreground group-focus-within:text-primary transition-colors">
+                      Vehicle Model
+                    </label>
+                    <Input 
+                      id="model"
+                      type="text"
+                      placeholder="e.g., Volvo FL" 
+                      value={newVehicle.model}
+                      onChange={(e) => setNewVehicle({...newVehicle, model: e.target.value})}
+                      className="bg-background/50 border-border/60 focus:border-primary focus:ring-primary/20 transition-all shadow-sm h-11"
+                      required
+                    />
+                  </div>
+                  <div className="space-y-2 group">
+                    <label htmlFor="plate" className="text-sm font-bold text-foreground group-focus-within:text-primary transition-colors">
+                      Number Plate
+                    </label>
+                    <Input 
+                      id="plate"
+                      type="text"
+                      placeholder="XX-00-XX-0000" 
+                      value={newVehicle.plate}
+                      onChange={handlePlateChange}
+                      maxLength={13}
+                      className="bg-background/50 border-border/60 focus:border-primary focus:ring-primary/20 transition-all font-mono shadow-sm h-11 tracking-wider"
+                      required
+                    />
+                  </div>
                 </div>
               </div>
               
