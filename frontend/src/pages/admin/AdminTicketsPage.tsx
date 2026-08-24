@@ -1,7 +1,11 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
 import { MessageSquare, AlertTriangle, ArrowRight } from 'lucide-react';
+import { toast } from 'sonner';
 
 const tickets = [
   { id: 'TKT-1042', user: 'David Smith', subject: 'Missed Pickup on 5th Ave', priority: 'high', status: 'open', date: '1 hour ago' },
@@ -10,6 +14,14 @@ const tickets = [
 ];
 
 const AdminTicketsPage = () => {
+  const [open, setOpen] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setOpen(false);
+    toast.success('Ticket submitted successfully! Support team has been notified.');
+  };
+
   return (
     <div className="w-full space-y-6 animate-in slide-in-from-bottom-4 duration-500">
       <div className="flex justify-between items-end">
@@ -17,7 +29,42 @@ const AdminTicketsPage = () => {
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Support Tickets</h1>
           <p className="text-muted-foreground mt-1">Manage user reports and system alerts.</p>
         </div>
-        <Button className="bg-slate-900 text-white hover:bg-slate-800">New Ticket</Button>
+        
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-slate-900 text-white hover:bg-slate-800">New Ticket</Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[425px]">
+            <form onSubmit={handleSubmit}>
+              <DialogHeader>
+                <DialogTitle>Create New Ticket</DialogTitle>
+                <DialogDescription>
+                  Open a new support ticket. An admin will review it shortly.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="grid gap-4 py-4">
+                <div className="grid gap-2">
+                  <label htmlFor="subject" className="text-sm font-medium">Subject</label>
+                  <Input id="subject" placeholder="e.g. System Outage" required />
+                </div>
+                <div className="grid gap-2">
+                  <label htmlFor="priority" className="text-sm font-medium">Priority</label>
+                  <select id="priority" className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50">
+                    <option value="low">Low</option>
+                    <option value="medium">Medium</option>
+                    <option value="high">High</option>
+                    <option value="critical">Critical</option>
+                  </select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={() => setOpen(false)}>Cancel</Button>
+                <Button type="submit">Create Ticket</Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
