@@ -2,6 +2,8 @@ import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/com
 import { Button } from '@/components/ui/button';
 import { Calendar, Clock, MapPin, Truck } from 'lucide-react';
 
+import { Link } from 'react-router-dom';
+
 const PickupSchedulePage = () => {
   return (
     <div className="w-full space-y-6 animate-in slide-in-from-bottom-4 duration-500">
@@ -10,7 +12,9 @@ const PickupSchedulePage = () => {
           <h1 className="text-3xl font-extrabold tracking-tight text-foreground">Pickup Schedule</h1>
           <p className="text-muted-foreground mt-1">Track your upcoming waste collection appointments.</p>
         </div>
-        <Button className="bg-green-600 text-white hover:bg-green-700">Request Special Pickup</Button>
+        <Button asChild className="bg-green-600 text-white hover:bg-green-700">
+          <Link to="/citizen/request">Request Special Pickup</Link>
+        </Button>
       </div>
 
       <Card className="border-none shadow-sm">

@@ -9,6 +9,16 @@ import { toast } from 'sonner';
 const CollectionRequestPage = () => {
   const [address, setAddress] = useState("123 Civic Way, Apartment 4B");
   const [isLocating, setIsLocating] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setTimeout(() => {
+      setIsSubmitting(false);
+      toast.success('Collection request submitted successfully! We will notify you when a truck is assigned.');
+    }, 1500);
+  };
 
   const handleUseCurrentLocation = () => {
     setIsLocating(true);
@@ -34,56 +44,62 @@ const CollectionRequestPage = () => {
               <CardTitle>Pickup Details</CardTitle>
               <CardDescription>Fill out the information below to schedule your pickup.</CardDescription>
             </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Waste Category</label>
-                <select className="w-full p-3 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
-                  <option>Furniture & Bulky Items</option>
-                  <option>Electronic Waste (E-Waste)</option>
-                  <option>Construction Debris</option>
-                  <option>Large Volumes of Recyclables</option>
-                </select>
-              </div>
-              <div className="space-y-2">
-                <label className="text-sm font-semibold text-foreground">Estimated Weight/Volume</label>
-                <Input placeholder="e.g. 2 large sofas, approx 50kg" className="bg-background border-border" />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
+            <CardContent>
+              <form onSubmit={handleSubmit} className="space-y-4">
                 <div className="space-y-2">
-                  <label className="text-sm font-semibold text-foreground">Preferred Date</label>
-                  <Input type="date" className="bg-background border-border" />
-                </div>
-                <div className="space-y-2">
-                  <label className="text-sm font-semibold text-foreground">Preferred Time</label>
-                  <select className="w-full p-3 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50">
-                    <option>Morning (8AM - 12PM)</option>
-                    <option>Afternoon (12PM - 4PM)</option>
-                    <option>Evening (4PM - 8PM)</option>
+                  <label className="text-sm font-semibold text-foreground">Waste Category</label>
+                  <select className="w-full p-3 rounded-lg border border-border bg-card text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                    <option>Furniture & Bulky Items</option>
+                    <option>Electronic Waste (E-Waste)</option>
+                    <option>Construction Debris</option>
+                    <option>Large Volumes of Recyclables</option>
                   </select>
                 </div>
-              </div>
-              <div className="space-y-2">
-                <div className="flex items-center justify-between">
-                  <label className="text-sm font-semibold text-foreground">Pickup Address</label>
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    className="h-6 text-xs text-primary px-2 hover:bg-primary/10" 
-                    onClick={handleUseCurrentLocation}
-                    disabled={isLocating}
-                  >
-                    <Navigation className={`w-3 h-3 mr-1 ${isLocating ? 'animate-spin' : ''}`} /> 
-                    {isLocating ? 'Locating...' : 'Use Current Location'}
-                  </Button>
+                <div className="space-y-2">
+                  <label className="text-sm font-semibold text-foreground">Estimated Weight/Volume</label>
+                  <Input placeholder="e.g. 2 large sofas, approx 50kg" className="bg-background border-border" required />
                 </div>
-                <Input 
-                  value={address} 
-                  onChange={(e) => setAddress(e.target.value)}
-                  placeholder="Enter your address manually"
-                  className="bg-background border-border" 
-                />
-              </div>
-              <Button className="w-full mt-4 h-12 font-bold shadow-sm" size="lg">Submit Request</Button>
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-foreground">Preferred Date</label>
+                    <Input type="date" className="bg-background border-border" required />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-semibold text-foreground">Preferred Time</label>
+                    <select className="w-full p-3 rounded-lg border border-border bg-background text-sm focus:outline-none focus:ring-2 focus:ring-primary/50" required>
+                      <option>Morning (8AM - 12PM)</option>
+                      <option>Afternoon (12PM - 4PM)</option>
+                      <option>Evening (4PM - 8PM)</option>
+                    </select>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <div className="flex items-center justify-between">
+                    <label className="text-sm font-semibold text-foreground">Pickup Address</label>
+                    <Button 
+                      type="button"
+                      variant="ghost" 
+                      size="sm" 
+                      className="h-6 text-xs text-primary px-2 hover:bg-primary/10" 
+                      onClick={handleUseCurrentLocation}
+                      disabled={isLocating}
+                    >
+                      <Navigation className={`w-3 h-3 mr-1 ${isLocating ? 'animate-spin' : ''}`} /> 
+                      {isLocating ? 'Locating...' : 'Use Current Location'}
+                    </Button>
+                  </div>
+                  <Input 
+                    value={address} 
+                    onChange={(e) => setAddress(e.target.value)}
+                    placeholder="Enter your address manually"
+                    className="bg-background border-border" 
+                    required
+                  />
+                </div>
+                <Button type="submit" disabled={isSubmitting} className="w-full mt-4 h-12 font-bold shadow-sm" size="lg">
+                  {isSubmitting ? 'Submitting...' : 'Submit Request'}
+                </Button>
+              </form>
             </CardContent>
           </Card>
         </div>
