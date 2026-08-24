@@ -13,6 +13,7 @@ export interface User {
   city?: string;
   ward?: string;
   status?: string;
+  civicCredits?: number;
   createdAt: string;
   updatedAt: string;
 }

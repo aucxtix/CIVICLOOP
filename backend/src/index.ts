@@ -8,6 +8,7 @@ import authRoutes from './routes/auth.js';
 import reportsRoutes from './routes/reports.js';
 import adminRoutes from './routes/admin.js';
 import aiRoutes from './routes/ai.js';
+import rewardsRoutes from './routes/rewards.js';
 
 dotenv.config();
 
@@ -36,6 +37,7 @@ app.use('/api/auth', authRoutes);
 app.use('/api/reports', reportsRoutes);
 app.use('/api/admin', adminRoutes);
 app.use('/api/ai', aiRoutes);
+app.use('/api/rewards', rewardsRoutes);
 
 app.get('/api/health', (req, res) => {
   res.json({ status: 'ok' });

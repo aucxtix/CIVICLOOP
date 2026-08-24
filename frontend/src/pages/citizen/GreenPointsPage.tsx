@@ -1,7 +1,7 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Leaf, Gift, Trophy, Star, ArrowRight } from 'lucide-react';
+import { Leaf, Gift, Trophy, Star, ArrowRight, Loader2 } from 'lucide-react';
 import { toast } from 'sonner';
 import {
   AlertDialog,
@@ -13,27 +13,79 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/components/ui/alert-dialog";
+import api from '@/lib/api';
+import { useAuthStore } from '@/store/authStore';
 
-const rewardsList = [
-  { title: '$5 Transit Pass', desc: 'Partner: City Transit', pts: 500, color: 'bg-blue-50 text-blue-600' },
-  { title: 'Free Coffee', desc: 'Partner: Local Cafe', pts: 200, color: 'bg-amber-50 text-amber-600' },
-  { title: 'Reusable Water Bottle', desc: 'Partner: EcoStore', pts: 1200, color: 'bg-green-50 text-green-600' }
-];
+interface Reward {
+  id: string;
+  name: string;
+  description: string;
+  creditsRequired: number;
+  stock: number;
+  partner: string;
+  color?: string; // We'll add this dynamically
+}
 
 const GreenPointsPage = () => {
-  const [balance, setBalance] = useState(1250);
-  const [selectedReward, setSelectedReward] = useState<typeof rewardsList[0] | null>(null);
+  const { user } = useAuthStore();
+  const [balance, setBalance] = useState(user?.civicCredits || 0);
+  const [rewardsList, setRewardsList] = useState<Reward[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [isRedeeming, setIsRedeeming] = useState(false);
+  const [selectedReward, setSelectedReward] = useState<Reward | null>(null);
 
-  const handleRedeem = () => {
+  useEffect(() => {
+    fetchRewards();
+    // Also fetch updated user balance
+    fetchUserBalance();
+  }, []);
+
+  const fetchUserBalance = async () => {
+    try {
+      const response = await api.get('/auth/me');
+      setBalance(response.data.civicCredits);
+    } catch (e) {
+      console.error(e);
+    }
+  };
+
+  const fetchRewards = async () => {
+    try {
+      const response = await api.get('/rewards');
+      const colors = ['bg-blue-50 text-blue-600', 'bg-amber-50 text-amber-600', 'bg-green-50 text-green-600', 'bg-purple-50 text-purple-600', 'bg-red-50 text-red-600'];
+      const data = response.data.map((r: any, i: number) => ({
+        ...r,
+        color: colors[i % colors.length]
+      }));
+      setRewardsList(data);
+    } catch (error) {
+      toast.error('Failed to load rewards');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRedeem = async () => {
     if (!selectedReward) return;
     
-    if (balance >= selectedReward.pts) {
-      setBalance(prev => prev - selectedReward.pts);
-      toast.success(`Successfully redeemed ${selectedReward.title}!`);
-    } else {
+    if (balance < selectedReward.creditsRequired) {
       toast.error('Insufficient points to redeem this reward.');
+      setSelectedReward(null);
+      return;
     }
-    setSelectedReward(null);
+
+    setIsRedeeming(true);
+    try {
+      await api.post(`/rewards/${selectedReward.id}/redeem`);
+      toast.success(`Successfully redeemed ${selectedReward.name}!`);
+      setBalance(prev => prev - selectedReward.creditsRequired);
+      fetchRewards(); // refresh stock
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to redeem reward');
+    } finally {
+      setIsRedeeming(false);
+      setSelectedReward(null);
+    }
   };
 
   return (
@@ -67,21 +119,32 @@ const GreenPointsPage = () => {
             <Trophy className="w-5 h-5 text-amber-500" /> Available Rewards
           </h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {rewardsList.map((reward, i) => (
+            {isLoading ? (
+              <div className="col-span-full flex justify-center py-8">
+                <Loader2 className="w-8 h-8 animate-spin text-primary" />
+              </div>
+            ) : rewardsList.length === 0 ? (
+              <div className="col-span-full text-center py-8 text-muted-foreground">
+                No rewards available at the moment.
+              </div>
+            ) : rewardsList.map((reward, i) => (
               <Card 
                 key={i} 
-                className="border-none shadow-sm hover:shadow-md transition-shadow cursor-pointer group"
-                onClick={() => setSelectedReward(reward)}
+                className={`border-none shadow-sm hover:shadow-md transition-shadow ${reward.stock > 0 ? 'cursor-pointer group' : 'opacity-50 cursor-not-allowed'}`}
+                onClick={() => reward.stock > 0 && setSelectedReward(reward)}
               >
                 <CardContent className="p-5 flex items-start gap-4">
                   <div className={`p-3 rounded-xl ${reward.color}`}>
                     <Gift className="w-6 h-6" />
                   </div>
-                  <div>
-                    <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">{reward.title}</h4>
-                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{reward.desc}</p>
-                    <div className="mt-3 flex items-center gap-1 text-sm font-bold text-primary">
-                      {reward.pts} pts <ArrowRight className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                  <div className="flex-1">
+                    <h4 className="font-bold text-foreground group-hover:text-primary transition-colors">{reward.name}</h4>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-1">{reward.description}</p>
+                    <div className="flex justify-between items-center mt-3">
+                      <div className="flex items-center gap-1 text-sm font-bold text-primary">
+                        {reward.creditsRequired} pts <ArrowRight className="w-3 h-3 ml-1 opacity-0 group-hover:opacity-100 group-hover:translate-x-1 transition-all" />
+                      </div>
+                      <span className="text-[10px] uppercase font-bold text-muted-foreground">{reward.stock > 0 ? `${reward.stock} Left` : 'Sold out'}</span>
                     </div>
                   </div>
                 </CardContent>
@@ -116,17 +179,20 @@ const GreenPointsPage = () => {
         </CardContent>
       </Card>
 
-      <AlertDialog open={!!selectedReward} onOpenChange={(open) => !open && setSelectedReward(null)}>
+      <AlertDialog open={!!selectedReward} onOpenChange={(open) => !open && !isRedeeming && setSelectedReward(null)}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Confirm Redemption</AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to redeem <strong>{selectedReward?.title}</strong> for <strong>{selectedReward?.pts} points</strong>? This action is final and cannot be revoked.
+              Are you sure you want to redeem <strong>{selectedReward?.name}</strong> for <strong>{selectedReward?.creditsRequired} points</strong>? This action is final and cannot be revoked.
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction onClick={handleRedeem} className="bg-primary text-primary-foreground hover:bg-primary/90">Confirm & Redeem</AlertDialogAction>
+            <AlertDialogCancel disabled={isRedeeming}>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={(e) => { e.preventDefault(); handleRedeem(); }} className="bg-primary text-primary-foreground hover:bg-primary/90" disabled={isRedeeming}>
+              {isRedeeming ? <Loader2 className="w-4 h-4 mr-2 animate-spin" /> : null}
+              Confirm & Redeem
+            </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
