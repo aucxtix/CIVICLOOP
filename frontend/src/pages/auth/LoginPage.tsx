@@ -51,24 +51,6 @@ const LoginPage = () => {
         navigate('/citizen');
       }
     } catch (error: any) {
-      if (error.message === 'Network Error' || error.code === 'ERR_NETWORK') {
-        const role = data.email.includes('admin') ? 'ADMIN' : data.email.includes('worker') ? 'WORKER' : 'CITIZEN';
-        const mockUser = {
-          id: 'demo-id',
-          name: data.email.split('@')[0],
-          email: data.email,
-          role,
-          civicCredits: 1250,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        login(mockUser as any, 'demo-token');
-        toast.success('Live Preview: Logged in using Demo Mode!');
-        if (role === 'ADMIN') navigate('/admin');
-        else if (role === 'WORKER') navigate('/worker');
-        else navigate('/citizen');
-        return;
-      }
       toast.error(error.response?.data?.error || 'Invalid credentials. Please try again.');
     } finally {
       setIsLoading(false);

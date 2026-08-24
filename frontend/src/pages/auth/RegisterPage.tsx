@@ -52,21 +52,6 @@ const RegisterPage = () => {
       navigate('/citizen');
       
     } catch (error: any) {
-      if (error.message === 'Network Error' || error.code === 'ERR_NETWORK') {
-        const mockUser = {
-          id: 'demo-id',
-          name: data.name,
-          email: data.email,
-          role: 'CITIZEN',
-          civicCredits: 0,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString()
-        };
-        login(mockUser as any, 'demo-token');
-        toast.success('Live Preview: Account created in Demo Mode!');
-        navigate('/citizen');
-        return;
-      }
       toast.error(error.response?.data?.error || 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
