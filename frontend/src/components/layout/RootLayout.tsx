@@ -15,9 +15,7 @@ const RootLayout = () => {
       <header className="border-b bg-card">
         <div className="container mx-auto flex h-16 items-center justify-between px-4">
           <div className="flex items-center gap-2">
-            <div className="h-8 w-8 rounded bg-primary flex items-center justify-center text-white font-bold">
-              C
-            </div>
+            <img src="/logo.png" alt="CivicLoop Logo" className="w-8 h-8 object-contain" />
             <span className="text-xl font-bold tracking-tight">CivicLoop</span>
           </div>
           <nav className="flex items-center gap-4">

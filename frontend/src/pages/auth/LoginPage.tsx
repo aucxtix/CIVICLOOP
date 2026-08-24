@@ -76,7 +76,7 @@ const LoginPage = () => {
           </div>
           <div className="relative z-10 text-white space-y-6">
             <Link to="/" className="inline-flex items-center gap-2 mb-8">
-              <Leaf className="w-8 h-8 text-green-400" />
+              <img src="/logo.png" alt="CivicLoop Logo" className="w-8 h-8 object-contain" />
               <span className="text-2xl font-extrabold tracking-tight">CivicLoop</span>
             </Link>
             <motion.h2 

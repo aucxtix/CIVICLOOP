@@ -24,7 +24,7 @@ const HomePage = () => {
       <nav className="fixed top-0 left-0 right-0 z-50 px-6 py-4 lg:px-12 flex items-center justify-between bg-card/80 backdrop-blur-xl border-b border-border/50">
         <div className="flex items-center gap-2">
           <div className="text-primary">
-            <Leaf className="w-8 h-8 fill-primary" />
+            <img src="/logo.png" alt="CivicLoop Logo" className="w-8 h-8 object-contain" />
           </div>
           <div className="flex flex-col">
             <span className="text-xl font-extrabold tracking-tight leading-none text-foreground">CivicLoop</span>
@@ -127,7 +127,7 @@ const HomePage = () => {
             {/* Mockup Header */}
             <div className="h-16 border-b border-border flex items-center justify-between px-6 bg-background/50">
               <div className="flex items-center gap-2">
-                <Leaf className="w-5 h-5 text-primary fill-primary" />
+                <img src="/logo.png" alt="CivicLoop Logo" className="w-5 h-5 object-contain" />
                 <span className="font-bold text-foreground">CivicLoop</span>
               </div>
               <div className="flex items-center gap-4">
@@ -274,7 +274,7 @@ const HomePage = () => {
       >
         <div className="max-w-7xl mx-auto px-6 lg:px-12 flex flex-col lg:flex-row items-center justify-between gap-8">
           <div className="flex items-center gap-6">
-            <Leaf className="w-12 h-12 text-secondary fill-secondary" />
+            <img src="/logo.png" alt="CivicLoop Logo" className="w-12 h-12 object-contain" />
             <div>
               <h2 className="text-2xl font-bold text-white">Make your next disposal decision smarter.</h2>
               <p className="text-primary-foreground/80 text-sm mt-1">Join thousands of citizens making a real difference in their communities.</p>

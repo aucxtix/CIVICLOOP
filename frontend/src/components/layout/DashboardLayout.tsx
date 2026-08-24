@@ -75,13 +75,7 @@ const DashboardLayout = ({ role }: DashboardLayoutProps) => {
       <aside className="w-64 bg-card border-r border-border hidden md:flex flex-col">
         <div className="h-16 flex items-center px-6 mb-4 mt-2">
           <div className="flex items-center gap-2">
-            <div className="text-primary">
-              <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M12 2L2 7L12 12L22 7L12 2Z" fill="currentColor" />
-                <path d="M2 17L12 22L22 17" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M2 12L12 17L22 12" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-              </svg>
-            </div>
+            <img src="/logo.png" alt="CivicLoop Logo" className="w-8 h-8 object-contain" />
             <span className="text-xl font-bold tracking-tight text-foreground">CivicLoop</span>
           </div>
         </div>
